@@ -1,23 +1,78 @@
 import { SafeAreaView, StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FlatList, Heading, HStack, Spinner, Text, VStack } from 'native-base';
 import { useSelector, useDispatch } from 'react-redux';
 import { COLORS, FONTS } from '../constants/theme';
 import PDFList from '../components/PDFList';
-import { PDF_LISTS, PDFItem } from '../constants/utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setPDFs } from '../redux/actions/PDFActions';
+import { PDF_LISTS, PDF_LISTS_TURKISH } from '../constants/utils';
 import RNFS from 'react-native-fs';
 
 
 interface Props {
     navigation: any;
+    login: any;
 }
 
-const Home: React.FC<Props> = ({ navigation }) => {
+const Home: React.FC<Props> = ({ navigation, login }) => {
     const user = useSelector((state: any) => state.user.user);
     const pdfs = useSelector((state: any) => state.pdfs.pdfs);
     const dispatch = useDispatch();
+
+    const downloadPDF = async (url: string, fileName: string) => {
+        const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+        try {
+            const response = await RNFS.downloadFile({ fromUrl: url, toFile: path }).promise;
+            if (response.statusCode === 200) {
+                return path;
+            } else {
+                console.error(`Failed to download file from ${url}`);
+                return null;
+            }
+        } catch (error) {
+            console.error(`Error downloading file from ${url}`, error);
+            return null;
+        }
+    };
+
+    const checkFirstTime = async () => {
+        const isFirstTime = await AsyncStorage.getItem('isFirstTime');
+        if (user !== null) {
+            if (isFirstTime === null) {
+                console.log('User: ', user);
+                const updatedPDFList = [];
+                const pdfList = user.language === 'Turkish' ? PDF_LISTS_TURKISH :
+                    user.language === 'English' ? PDF_LISTS : PDF_LISTS;
+                for (const pdf of pdfList) {
+                    const localPath = await downloadPDF(pdf.pdf, `${pdf.id}.pdf`);
+                    updatedPDFList.push({
+                        ...pdf,
+                        localPath: localPath || pdf.pdf,
+                    });
+                }
+
+                await AsyncStorage.setItem('pdfFiles', JSON.stringify(updatedPDFList));
+                const storedPDFs = await AsyncStorage.getItem('pdfFiles');
+                if (storedPDFs !== null) {
+                    const parsedPDFs = JSON.parse(storedPDFs);
+                    dispatch(setPDFs(parsedPDFs));
+                    await AsyncStorage.setItem('isFirstTime', 'false');
+                }
+            }
+        }
+    };
+
+    useEffect(() => {
+        const setup = async () => {
+            if (login === true) {
+                await checkFirstTime();
+            }
+        };
+
+        setup();
+
+    }, []);
 
 
     useEffect(() => {
@@ -69,6 +124,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
                 <VStack
                     mt={4}
                     flex={1}
+                    mb={20}
                     justifyContent={'center'}
                 >
                     {

@@ -8,9 +8,10 @@ import { useSelector } from 'react-redux';
 
 interface Props {
     navigation: any;
+    login: any;
 }
 
-const Profile: React.FC<Props> = ({ navigation }) => {
+const Profile: React.FC<Props> = ({ navigation, login }) => {
     const user = useSelector((state: any) => state.user.user);
 
     return (

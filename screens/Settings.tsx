@@ -18,6 +18,8 @@ const Settings: React.FC<Props> = ({ navigation }) => {
     const handleLogout = async () => {
         try {
             await AsyncStorage.removeItem('user');
+            await AsyncStorage.removeItem('pdfFiles');
+            await AsyncStorage.removeItem('isFirstTime');
             dispatch(logoutUser());
             navigation.navigate('SignIn');
         } catch (error) {

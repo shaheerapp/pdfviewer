@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { ChangePassword, EditProfile, Settings, SignIn, SignUp, Splash, ViewPDF } from '../screens';
+import { ChangePassword, EditProfile, Home, Settings, SignIn, SignUp, Splash, ViewPDF } from '../screens';
 import BottomNavigation from './BottomNavigation';
 
 

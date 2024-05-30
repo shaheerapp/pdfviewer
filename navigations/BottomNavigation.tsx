@@ -6,9 +6,13 @@ import { Center, Icon, VStack, Text } from 'native-base';
 import Feather from 'react-native-vector-icons/Feather';
 import { COLORS, FONTS } from '../constants/theme';
 
+interface Props {
+    route: any;
+}
 
-const BottomNavigation = () => {
+const BottomNavigation: React.FC<Props> = ({ route }) => {
     const Tab = createBottomTabNavigator();
+    const login = route.params?.login ?? false;
     return (
         <Tab.Navigator
             screenOptions={{
@@ -24,7 +28,7 @@ const BottomNavigation = () => {
             }}
             initialRouteName="Home"
         >
-            <Tab.Screen name="Home" component={Home}
+            <Tab.Screen name="Home"
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <VStack>
@@ -46,8 +50,10 @@ const BottomNavigation = () => {
                         </VStack>
                     ),
                 }}
-            />
-            <Tab.Screen name="Profile" component={Profile}
+            >
+                {props => <Home {...props} login={login} />}
+            </Tab.Screen>
+            <Tab.Screen name="Profile"
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <VStack>
@@ -67,7 +73,9 @@ const BottomNavigation = () => {
                             </Center>
                         </VStack>
                     ),
-                }} />
+                }}>
+                {props => <Profile {...props} login={login} />}
+            </Tab.Screen>
         </Tab.Navigator>
     );
 };

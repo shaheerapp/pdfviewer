@@ -1,4 +1,4 @@
-import { Dimensions, Linking, Platform, SafeAreaView, StyleSheet } from 'react-native';
+import { Dimensions, Linking, SafeAreaView, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { HStack, Icon, Pressable, Text, VStack } from 'native-base';
 import { COLORS, FONTS } from '../constants/theme';

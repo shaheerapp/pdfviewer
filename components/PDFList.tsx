@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import React from 'react';
-import { HStack, Icon, Pressable, Text, VStack } from 'native-base';
+import { HStack, Icon, Pressable, Text } from 'native-base';
 import { COLORS, FONTS } from '../constants/theme';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 

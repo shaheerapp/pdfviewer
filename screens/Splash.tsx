@@ -3,21 +3,19 @@ import React, { useEffect } from 'react';
 import { Box, Spinner, VStack } from 'native-base';
 import { COLORS } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setUserDetails } from '../redux/actions/UserActions';
-import { setPDFs } from '../redux/actions/PDFActions';
-import { PDF_LISTS } from '../constants/utils';
+import { PDF_LISTS, PDF_LISTS_TURKISH } from '../constants/utils';
 import RNFS from 'react-native-fs';
 
-
 interface Props {
-    navigation: any,
+    navigation: any;
 }
 
 const Splash: React.FC<Props> = ({ navigation }) => {
     const dispatch = useDispatch();
 
-    const downloadPDF = async (url: any, fileName: any) => {
+    const downloadPDF = async (url: string, fileName: string) => {
         const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
         try {
             const response = await RNFS.downloadFile({ fromUrl: url, toFile: path }).promise;
@@ -33,62 +31,54 @@ const Splash: React.FC<Props> = ({ navigation }) => {
         }
     };
 
-    const checkFirstTime = async () => {
+    const checkFirstTime = async (userData: any) => {
         const isFirstTime = await AsyncStorage.getItem('isFirstTime');
-        if (isFirstTime === null) {
-            const updatedPDFList = [];
-            for (const pdf of PDF_LISTS) {
-                const localPath = await downloadPDF(pdf.pdf, `${pdf.id}.pdf`);
-                if (localPath) {
+        if (userData !== null) {
+            if (isFirstTime === null) {
+                console.log('User: ', userData);
+                const updatedPDFList = [];
+                const pdfList = userData.language === 'Turkish' ? PDF_LISTS_TURKISH :
+                    userData.language === 'English' ? PDF_LISTS : PDF_LISTS;
+                for (const pdf of pdfList) {
+                    const localPath = await downloadPDF(pdf.pdf, `${pdf.id}.pdf`);
                     updatedPDFList.push({
                         ...pdf,
-                        localPath,
-                    });
-                } else {
-                    updatedPDFList.push({
-                        ...pdf,
-                        localPath: pdf.pdf,
+                        localPath: localPath || pdf.pdf,
                     });
                 }
+
+                await AsyncStorage.setItem('pdfFiles', JSON.stringify(updatedPDFList));
+                await AsyncStorage.setItem('isFirstTime', 'false');
             }
-            await AsyncStorage.setItem('pdfFiles', JSON.stringify(updatedPDFList));
-            await AsyncStorage.setItem('isFirstTime', 'false');
         }
     };
-
 
     useEffect(() => {
         const minTimePromise = new Promise(resolve => setTimeout(resolve, 2000));
 
         const asyncOperations = async () => {
-            const user = await AsyncStorage.getItem('user');
+            const userData = await AsyncStorage.getItem('user');
+            if (userData) {
+                dispatch(setUserDetails(JSON.parse(userData)));
+            }
+
             const isFirstTime = await AsyncStorage.getItem('isFirstTime');
             if (isFirstTime === null) {
-                await checkFirstTime();
+                await checkFirstTime(userData);
             }
-            if (user) {
-                dispatch(setUserDetails(JSON.parse(user)));
-            }
-            return user;
+
+            return userData;
         };
 
         const navigate = async () => {
-            const user = await asyncOperations();
+            const userData = await asyncOperations();
             await minTimePromise;
-            if (user) {
-                navigation.replace('Main');
-            } else {
-                navigation.replace('SignIn');
-            }
+            navigation.replace(userData ? 'Main' : 'SignIn');
         };
 
         navigate();
-
-        // Cleanup if needed
-        return () => {
-            // Any necessary cleanup
-        };
     }, [dispatch, navigation]);
+
     return (
         <Box flex={1}>
             <VStack flex={1} justifyContent={'center'} alignItems={'center'}>

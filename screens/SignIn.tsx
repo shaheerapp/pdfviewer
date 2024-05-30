@@ -1,9 +1,8 @@
 import { SafeAreaView, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { Box, Center, HStack, Icon, Image, Input, Pressable, Spacer, Text, VStack } from 'native-base';
+import { Box, Center, HStack, Icon, Input, Pressable, Text, VStack } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS } from '../constants/theme';
-import { IMAGES } from '../constants/images';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { get, query, ref, orderByChild, equalTo } from 'firebase/database';
 import { database } from '../firebase/firebaseconfig';
@@ -75,7 +74,7 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                     await AsyncStorage.setItem('user', JSON.stringify(user));
                     dispatch(setUserDetails(user));
                     setIsSigning(false);
-                    navigation.navigate('Main');
+                    navigation.navigate('Main', { login: true });
                 } else {
                     setIsSigning(false);
                     setPasswordError('Incorrect password');

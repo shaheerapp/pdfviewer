@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { Box, Center, CheckIcon, HStack, Icon, Input, Pressable, Select, Text, VStack } from 'native-base';
+import { Box, HStack, Input, Pressable, Text, VStack } from 'native-base';
 import { COLORS, FONTS } from '../constants/theme';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';

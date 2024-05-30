@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import React, { useState } from 'react';
-import { Box, Center, CheckIcon, HStack, Icon, Image, Input, Pressable, Select, Spacer, Text, VStack } from 'native-base';
+import { Box, Center, CheckIcon, HStack, Icon, Input, Pressable, Select, Text, VStack } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS } from '../constants/theme';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -426,9 +426,9 @@ const SignUp: React.FC<Props> = ({ navigation }) => {
                             onValueChange={itemValue => setLanguage(itemValue)}
                         >
                             <Select.Item label="English" value="English" />
+                            <Select.Item label="Hindi" value="Hindi" />
                             <Select.Item label="Arabic" value="Arabic" />
-                            <Select.Item label="Nepali" value="Nepali" />
-                            <Select.Item label="Afrikaans" value="Afrikaans" />
+                            <Select.Item label="Turkish" value="Turkish" />
                         </Select>
                         {
                             languageError &&
