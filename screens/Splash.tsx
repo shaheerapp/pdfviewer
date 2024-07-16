@@ -5,7 +5,7 @@ import { COLORS } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserDetails } from '../redux/actions/UserActions';
-import { PDF_LISTS, PDF_LISTS_TURKISH } from '../constants/utils';
+import { PDF_LISTS_ARABIC, PDF_LISTS_ENGLISH, PDF_LISTS_HINDI, PDF_LISTS_TURKISH } from '../constants/utils';
 import RNFS from 'react-native-fs';
 
 interface Props {
@@ -38,7 +38,9 @@ const Splash: React.FC<Props> = ({ navigation }) => {
                 console.log('User: ', userData);
                 const updatedPDFList = [];
                 const pdfList = userData.language === 'Turkish' ? PDF_LISTS_TURKISH :
-                    userData.language === 'English' ? PDF_LISTS : PDF_LISTS;
+                    userData.language === 'English' ? PDF_LISTS_ENGLISH :
+                        userData.language === 'Arabic' ? PDF_LISTS_ARABIC :
+                            userData.language === 'Hindi' ? PDF_LISTS_HINDI : PDF_LISTS_ENGLISH;
                 for (const pdf of pdfList) {
                     const localPath = await downloadPDF(pdf.pdf, `${pdf.id}.pdf`);
                     updatedPDFList.push({

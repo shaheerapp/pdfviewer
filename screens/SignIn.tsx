@@ -74,7 +74,7 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                     await AsyncStorage.setItem('user', JSON.stringify(user));
                     dispatch(setUserDetails(user));
                     setIsSigning(false);
-                    navigation.navigate('Main', { login: true });
+                    navigation.replace('Main', { login: true });
                 } else {
                     setIsSigning(false);
                     setPasswordError('Incorrect password');

@@ -1,12 +1,12 @@
 import { SafeAreaView, StyleSheet } from 'react-native';
-import React, { useEffect } from 'react';
-import { FlatList, Heading, HStack, Spinner, Text, VStack } from 'native-base';
+import React, { useEffect, useState } from 'react';
+import { Center, FlatList, Heading, HStack, Spinner, Text, VStack } from 'native-base';
 import { useSelector, useDispatch } from 'react-redux';
 import { COLORS, FONTS } from '../constants/theme';
 import PDFList from '../components/PDFList';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setPDFs } from '../redux/actions/PDFActions';
-import { PDF_LISTS, PDF_LISTS_TURKISH } from '../constants/utils';
+import { PDF_LISTS_ARABIC, PDF_LISTS_ENGLISH, PDF_LISTS_HINDI, PDF_LISTS_TURKISH } from '../constants/utils';
 import RNFS from 'react-native-fs';
 
 
@@ -18,6 +18,8 @@ interface Props {
 const Home: React.FC<Props> = ({ navigation, login }) => {
     const user = useSelector((state: any) => state.user.user);
     const pdfs = useSelector((state: any) => state.pdfs.pdfs);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const dispatch = useDispatch();
 
     const downloadPDF = async (url: string, fileName: string) => {
@@ -40,11 +42,13 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
         const isFirstTime = await AsyncStorage.getItem('isFirstTime');
         if (user !== null) {
             if (isFirstTime === null) {
-                console.log('User: ', user);
                 const updatedPDFList = [];
                 const pdfList = user.language === 'Turkish' ? PDF_LISTS_TURKISH :
-                    user.language === 'English' ? PDF_LISTS : PDF_LISTS;
+                    user.language === 'English' ? PDF_LISTS_ENGLISH :
+                        user.language === 'Arabic' ? PDF_LISTS_ARABIC :
+                            user.language === 'Hindi' ? PDF_LISTS_HINDI : PDF_LISTS_ENGLISH;
                 for (const pdf of pdfList) {
+                    setIsDownloading(true);
                     const localPath = await downloadPDF(pdf.pdf, `${pdf.id}.pdf`);
                     updatedPDFList.push({
                         ...pdf,
@@ -58,6 +62,7 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
                     const parsedPDFs = JSON.parse(storedPDFs);
                     dispatch(setPDFs(parsedPDFs));
                     await AsyncStorage.setItem('isFirstTime', 'false');
+                    setIsDownloading(false);
                 }
             }
         }
@@ -76,12 +81,17 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
 
 
     useEffect(() => {
+        setIsLoading(true);
         const loadPDFsFromStorage = async () => {
             try {
                 const storedPDFs = await AsyncStorage.getItem('pdfFiles');
                 if (storedPDFs !== null) {
                     const parsedPDFs = JSON.parse(storedPDFs);
                     dispatch(setPDFs(parsedPDFs));
+                    setIsLoading(false);
+                } else {
+                    setIsLoading(false);
+                    setIsDownloading(true);
                 }
             } catch (error) {
                 console.error('Error loading PDFs from storage:', error);
@@ -117,7 +127,7 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
                         fontFamily={FONTS.InterSemiBold}
                         fontWeight={'semibold'}
                     >
-                        PDF Viewer
+                        WWJ
                     </Text>
 
                 </HStack>
@@ -128,25 +138,35 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
                     justifyContent={'center'}
                 >
                     {
-                        pdfs.length > 0 ?
-                            <FlatList
-                                data={pdfs}
-                                keyExtractor={(item: any) => item.id.toString()}
-                                renderItem={(item) =>
-                                    <PDFList
-                                        item={item.item}
-                                        navigation={navigation}
-                                        onMarkAsRead={markAsRead}
-                                    />
-                                }
-                            />
-                            :
+                        isLoading ?
                             <HStack space={2} justifyContent="center" alignItems={'center'}>
                                 <Spinner size={'lg'} color={COLORS.primary} accessibilityLabel="Loading pdfs" />
                                 <Heading color={COLORS.primary} fontSize="lg">
                                     Loading
                                 </Heading>
                             </HStack>
+                            :
+                            isDownloading ?
+                                <HStack space={2} justifyContent="center" alignItems={'center'}>
+                                    <Spinner size={'lg'} color={COLORS.primary} accessibilityLabel="Loading pdfs" />
+                                    <Heading color={COLORS.primary} fontSize="lg">
+                                        Downloading...
+                                    </Heading>
+                                </HStack>
+                                :
+
+                                <FlatList
+                                    data={pdfs}
+                                    keyExtractor={(item: any) => item.id.toString()}
+                                    renderItem={(item) =>
+                                        <PDFList
+                                            item={item.item}
+                                            navigation={navigation}
+                                            onMarkAsRead={markAsRead}
+                                        />
+                                    }
+                                />
+
                     }
                 </VStack>
             </VStack>

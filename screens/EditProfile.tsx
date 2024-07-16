@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { Box, HStack, Input, Pressable, Text, VStack } from 'native-base';
+import { Box, CheckIcon, HStack, Input, Pressable, Select, Text, VStack } from 'native-base';
 import { COLORS, FONTS } from '../constants/theme';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { database } from '../firebase/firebaseconfig';
 import { logoutUser, updateProfile } from '../redux/actions/UserActions';
 import Snackbar from 'react-native-snackbar';
+import { resetPdfs } from '../redux/actions/PDFActions';
 
 interface Props {
     navigation: any;
@@ -22,6 +23,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [location, setLocation] = useState('');
     const [country, setCountry] = useState('');
+    const [language, setLanguage] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
 
     const [firstNameError, setFirstNameError] = useState('');
@@ -29,6 +31,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
     const [phoneNumberError, setPhoneNumberError] = useState('');
     const [locationError, setLocationError] = useState('');
     const [countryError, setCountryError] = useState('');
+    const [languageWarning, setLanguageWarning] = useState('');
 
 
     useEffect(() => {
@@ -37,13 +40,26 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
         setPhoneNumber(user.phoneNumber);
         setLocation(user.location);
         setCountry(user.country);
+        setLanguage(user.language);
     }, []);
+
+    useEffect(() => {
+        if (user.language !== language) {
+            setLanguageWarning('On Language Change will effect your downloaded PDFs and on update you will need to login again.');
+        } else {
+            setLanguageWarning('');
+        }
+
+    }, [language]);
 
     const handleLogout = async () => {
         try {
             await AsyncStorage.removeItem('user');
+            await AsyncStorage.removeItem('pdfFiles');
+            await AsyncStorage.removeItem('isFirstTime');
+            dispatch(resetPdfs());
             dispatch(logoutUser());
-            navigation.navigate('SignIn');
+            navigation.replace('SignIn');
         } catch (error) {
             console.error('Error logging out:', error);
         }
@@ -85,14 +101,22 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
             if (snapshot.exists()) {
                 setIsUpdating(true);
                 const userId = Object.keys(snapshot.val())[0];
-
+                let updatedLanguage;
+                if (user.language !== language) {
+                    updatedLanguage = language;
+                    await AsyncStorage.removeItem('pdfFiles');
+                    await AsyncStorage.removeItem('isFirstTime');
+                    dispatch(resetPdfs());
+                } else {
+                    updatedLanguage = user.language;
+                }
                 const updatedUser = {
                     firstName,
                     lastName,
                     phoneNumber,
                     location,
                     country,
-                    language: user.language,
+                    language: updatedLanguage,
                     username: user.username,
                     password: user.password,
                 };
@@ -101,6 +125,9 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
                 await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
                 dispatch(updateProfile(updatedUser));
                 setIsUpdating(false);
+                if (languageWarning) {
+                    await handleLogout();
+                }
                 Snackbar.show({
                     text: 'Profile updated successfully',
                     duration: Snackbar.LENGTH_SHORT,
@@ -111,7 +138,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
                     text: 'User not found',
                     duration: Snackbar.LENGTH_SHORT,
                 });
-                handleLogout();
+                await handleLogout();
 
             }
         } catch (error) {
@@ -122,6 +149,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
             });
         }
     };
+
 
 
     return (
@@ -321,6 +349,39 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
                             mt={1}
                         >
                             {countryError}
+                        </Text>
+                    }
+                    <Select
+                        selectedValue={language}
+                        accessibilityLabel="Choose Language"
+                        placeholder="Choose Language"
+                        paddingTop={3}
+                        color={COLORS.gray200}
+                        borderColor={COLORS.gray50}
+                        paddingBottom={3}
+                        fontSize={15}
+                        _selectedItem={{
+                            bg: 'teal.600',
+                            endIcon: <CheckIcon size={'5'} />,
+                        }}
+                        mt={3}
+                        onValueChange={itemValue => setLanguage(itemValue)}
+                    >
+                        <Select.Item label="English" value="English" />
+                        <Select.Item label="Hindi" value="Hindi" />
+                        <Select.Item label="Arabic" value="Arabic" />
+                        <Select.Item label="Turkish" value="Turkish" />
+                    </Select>
+                    {
+                        languageWarning &&
+                        <Text
+                            fontSize={12}
+                            fontFamily={FONTS.InterLight}
+                            fontWeight={'medium'}
+                            color={COLORS.red100}
+                            mt={1}
+                        >
+                            {languageWarning}
                         </Text>
                     }
                     <Pressable

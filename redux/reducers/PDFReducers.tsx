@@ -1,5 +1,5 @@
 import { PDFItem } from '../../constants/utils';
-import { SET_PDFS } from '../actions/PDFActions';
+import { RESET_PDFS, SET_PDFS } from '../actions/PDFActions';
 
 const initialState = {
     pdfs: [] as PDFItem[],
@@ -12,6 +12,8 @@ const PDFReducer = (state = initialState, action: any) => {
                 ...state,
                 pdfs: action.payload,
             };
+        case RESET_PDFS:
+            return initialState;
         default:
             return state;
     }

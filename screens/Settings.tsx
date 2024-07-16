@@ -1,31 +1,65 @@
-import { SafeAreaView, StyleSheet } from 'react-native';
-import React from 'react';
+import { Alert, SafeAreaView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
 import { Box, HStack, Icon, Pressable, Text, VStack } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import { COLORS, FONTS } from '../constants/theme';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logoutUser } from '../redux/actions/UserActions';
+import { resetPdfs } from '../redux/actions/PDFActions';
+import { deleteUser } from 'firebase/auth';
+import { equalTo, get, orderByChild, query, ref, remove } from 'firebase/database';
+import { database } from '../firebase/firebaseconfig';
 
 interface Props {
     navigation: any;
 }
 
 const Settings: React.FC<Props> = ({ navigation }) => {
+    const user = useSelector((state: any) => state.user.user);
     const dispatch = useDispatch();
+    const [isDeleteing, setIsDeleting] = useState(false);
 
     const handleLogout = async () => {
         try {
             await AsyncStorage.removeItem('user');
             await AsyncStorage.removeItem('pdfFiles');
             await AsyncStorage.removeItem('isFirstTime');
+            dispatch(resetPdfs());
             dispatch(logoutUser());
-            navigation.navigate('SignIn');
+            navigation.replace('SignIn');
         } catch (error) {
             console.error('Error logging out:', error);
         }
     };
+
+    const handleDeleteAccount = async () => {
+        if (user) {
+            setIsDeleting(true);
+            try {
+                const userQuery = query(ref(database, 'Users'), orderByChild('username'), equalTo(user.username));
+                const snapshot = await get(userQuery);
+
+                if (snapshot.exists()) {
+                    const userId = Object.keys(snapshot.val())[0];
+                    await remove(ref(database, `Users/${userId}`));
+                    console.log('User account deleted successfully');
+                    await handleLogout();
+                    setIsDeleting(false);
+                } else {
+                    console.log('Error', 'User not found in the database');
+                    setIsDeleting(false);
+                }
+            } catch (error: any) {
+                console.error('Error deleting user account:', error.message);
+                setIsDeleting(false);
+            }
+        } else {
+            console.log('Error', 'No user is currently signed in');
+        }
+    };
+
     return (
         <SafeAreaView>
             <VStack
@@ -200,6 +234,33 @@ const Settings: React.FC<Props> = ({ navigation }) => {
                     </VStack>
                     <Pressable
                         mt={10}
+                        _pressed={{ opacity: 0.8 }}
+                        onPress={handleDeleteAccount}
+                        isDisabled={isDeleteing ? true : false}
+                        _disabled={{ opacity: 0.7 }}
+                    >
+                        <HStack
+                            justifyContent={'space-between'}
+                            alignItems={'center'}
+                            bg={COLORS.red50}
+                            p={'2.5'}
+                            pl={4}
+                            mt={2}
+                            rounded={'xl'}
+                        >
+                            <Text
+                                fontSize={15}
+                                fontFamily={FONTS.InterBold}
+                                fontWeight={'bold'}
+                                color={COLORS.white}
+                            >
+                                Delete your account
+                            </Text>
+                            <Icon as={Ionicons} name="trash-outline" size={6} color={COLORS.white} />
+                        </HStack>
+                    </Pressable>
+                    <Pressable
+                        mt={3}
                         _pressed={{ opacity: 0.8 }}
                         onPress={handleLogout}
                     >
