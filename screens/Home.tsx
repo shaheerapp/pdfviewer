@@ -1,12 +1,12 @@
 import { SafeAreaView, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { Center, FlatList, Heading, HStack, Spinner, Text, VStack } from 'native-base';
+import { Box, Center, FlatList, Heading, HStack, Progress, Spinner, Text, VStack } from 'native-base';
 import { useSelector, useDispatch } from 'react-redux';
 import { COLORS, FONTS } from '../constants/theme';
 import PDFList from '../components/PDFList';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setPDFs } from '../redux/actions/PDFActions';
-import { PDF_LISTS_ARABIC, PDF_LISTS_ENGLISH, PDF_LISTS_HINDI, PDF_LISTS_TURKISH } from '../constants/utils';
+import { PDF_LISTS_ARABIC, PDF_LISTS_ENGLISH, PDF_LISTS_HINDI, PDF_LISTS_RUSSIAN, PDF_LISTS_TURKISH } from '../constants/utils';
 import RNFS from 'react-native-fs';
 
 
@@ -20,6 +20,8 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
     const pdfs = useSelector((state: any) => state.pdfs.pdfs);
     const [isLoading, setIsLoading] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadedCount, setDownloadedCount] = useState(0);
+    const [pdfCount, setPdfCount] = useState(0);
     const dispatch = useDispatch();
 
     const downloadPDF = async (url: string, fileName: string) => {
@@ -46,10 +48,17 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
                 const pdfList = user.language === 'Turkish' ? PDF_LISTS_TURKISH :
                     user.language === 'English' ? PDF_LISTS_ENGLISH :
                         user.language === 'Arabic' ? PDF_LISTS_ARABIC :
-                            user.language === 'Hindi' ? PDF_LISTS_HINDI : PDF_LISTS_ENGLISH;
+                            user.language === 'Hindi' ? PDF_LISTS_HINDI :
+                                user.language === 'Russian' ? PDF_LISTS_RUSSIAN : PDF_LISTS_ENGLISH;
+                let count = 0;
+                setPdfCount(pdfList.length);
                 for (const pdf of pdfList) {
                     setIsDownloading(true);
                     const localPath = await downloadPDF(pdf.pdf, `${pdf.id}.pdf`);
+                    if (localPath) {
+                        count++;
+                        setDownloadedCount(count);
+                    }
                     updatedPDFList.push({
                         ...pdf,
                         localPath: localPath || pdf.pdf,
@@ -67,6 +76,7 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
             }
         }
     };
+
 
     useEffect(() => {
         const setup = async () => {
@@ -147,12 +157,37 @@ const Home: React.FC<Props> = ({ navigation, login }) => {
                             </HStack>
                             :
                             isDownloading ?
-                                <HStack space={2} justifyContent="center" alignItems={'center'}>
-                                    <Spinner size={'lg'} color={COLORS.primary} accessibilityLabel="Loading pdfs" />
-                                    <Heading color={COLORS.primary} fontSize="lg">
-                                        Downloading...
-                                    </Heading>
-                                </HStack>
+                                <VStack alignItems={'center'}
+                                >
+                                    <HStack>
+                                        <Heading color={COLORS.primary} fontSize="lg">
+                                            Downloading: {' '}
+                                        </Heading>
+                                        <Heading color={COLORS.primary} fontSize="lg">
+                                            {downloadedCount}/{pdfCount}
+                                        </Heading>
+                                    </HStack>
+                                    <HStack
+                                        space={2}
+                                        justifyContent="center"
+                                        alignItems={'center'}
+                                        mt={4}>
+
+                                        <Box w="50%" maxW="400">
+                                            <Progress
+                                                bg="white"
+                                                _filledTrack={{
+                                                    bg: COLORS.primary,
+                                                }}
+                                                value={downloadedCount}
+                                                max={pdfCount}
+                                                mx="4"
+                                            />
+                                        </Box>
+
+                                    </HStack>
+                                </VStack>
+
                                 :
 
                                 <FlatList

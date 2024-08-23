@@ -16,12 +16,12 @@ interface Props {
 
 const SignIn: React.FC<Props> = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
-    const [username, setUsername] = useState('');
+    const [emailAddress, setEmailAddress] = useState('');
     const [password, setPassword] = useState('');
 
     const dispatch = useDispatch();
 
-    const [usernameError, setUsernameError] = useState('');
+    const [emailAddressError, setEmailAddressError] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
     const [isSigning, setIsSigning] = useState(false);
@@ -31,13 +31,13 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
     const signInUser = async () => {
         let valid = true;
 
-        setUsernameError('');
+        setEmailAddressError('');
         setPasswordError('');
         setSignInError('');
 
         // Validate username
-        if (username === '') {
-            setUsernameError('Username is required');
+        if (emailAddress === '') {
+            setEmailAddressError('Email Address is required');
             valid = false;
         }
 
@@ -56,8 +56,8 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
 
         try {
             setIsSigning(true);
-            // Construct a query to find the user by username
-            const userQuery = query(ref(database, 'Users'), orderByChild('username'), equalTo(username));
+            // Construct a query to find the user by emailAddress
+            const userQuery = query(ref(database, 'Users'), orderByChild('emailAddress'), equalTo(emailAddress));
 
             // Get the snapshot of the query result
             const snapshot = await get(userQuery);
@@ -81,7 +81,7 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                 }
             } else {
                 setIsSigning(false);
-                setUsernameError('User not found');
+                setEmailAddressError('User not found');
             }
         } catch (error) {
             console.error('Error signing in:', error);
@@ -111,7 +111,7 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                         fontWeight={'medium'}
                         color={COLORS.gray75}
                     >
-                        Enter Your Username & Password
+                        Enter Your Email & Password
                     </Text>
 
                     {
@@ -139,19 +139,19 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                         autoCapitalize={'none'}
                         autoCorrect={false}
                         color={COLORS.gray200}
-                        borderColor={usernameError ? COLORS.red50 : COLORS.gray50}
-                        placeholder="Enter Username"
+                        borderColor={emailAddressError ? COLORS.red50 : COLORS.gray50}
+                        placeholder="Enter Email"
                         type={'text'}
                         _focus={{
                             backgroundColor: 'transparent',
                             borderColor: COLORS.primary,
 
                         }}
-                        onChangeText={(text) => setUsername(text)}
-                        value={username}
+                        onChangeText={(text) => setEmailAddress(text)}
+                        value={emailAddress}
                     />
                     {
-                        usernameError &&
+                        emailAddressError &&
                         <Text
                             fontSize={12}
                             fontFamily={FONTS.InterLight}
@@ -159,7 +159,7 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                             color={COLORS.red100}
                             mt={1}
                         >
-                            {usernameError}
+                            {emailAddressError}
                         </Text>
                     }
                     <Input variant="outline"
@@ -238,29 +238,32 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
                             </Box>
                         </HStack>
                     </Pressable>
-                    <Center mt={10}>
+                    <HStack
+                        mt={10}
+                        alignItems={'center'}
+                        justifyContent={'center'}
+                    >
                         <Text
                             fontSize={15}
                             fontFamily={FONTS.InterMedium}
                             fontWeight={'medium'}
                             color={COLORS.gray75}
                         >
-                            Don't have an account?
-                            <Box ml={1} />
-                            <Pressable
-                                onPress={() => navigation.navigate('SignUp')}
-                                _pressed={{ opacity: 0.7 }}>
-                                <Text
-                                    fontSize={15}
-                                    fontFamily={FONTS.InterMedium}
-                                    fontWeight={'medium'}
-                                    color={COLORS.primary}
-                                >
-                                    Sign Up
-                                </Text>
-                            </Pressable>
+                            Don't have an account?{' '}
                         </Text>
-                    </Center>
+                        <Pressable
+                            onPress={() => navigation.navigate('SignUp')}
+                            _pressed={{ opacity: 0.7 }}>
+                            <Text
+                                fontSize={15}
+                                fontFamily={FONTS.InterMedium}
+                                fontWeight={'medium'}
+                                color={COLORS.primary}
+                            >
+                                Sign Up
+                            </Text>
+                        </Pressable>
+                    </HStack>
                 </VStack>
             </VStack>
         </SafeAreaView>

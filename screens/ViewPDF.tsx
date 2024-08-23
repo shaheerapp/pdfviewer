@@ -83,7 +83,12 @@ const ViewPDF: React.FC<Props> = ({ navigation, route }) => {
                         <Icon as={Ionicons} name={isMarkAsRead ? 'checkmark-circle' : 'checkmark-circle-outline'} color={COLORS.primary} size={7} />
                     </Pressable>
                 </HStack>
-                <VStack mt={6} alignItems={'center'} ml={4} mr={4}>
+                <VStack
+                    mt={6}
+                    alignItems={'center'}
+                    ml={4}
+                    mr={4}
+                >
                     {pdfSource.uri !== '' && (
                         <Pdf
                             trustAllCerts={false}
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
     },
     pdf: {
         width: Dimensions.get('window').width / 1.05,
-        height: Dimensions.get('window').height,
+        height: Dimensions.get('window').height / 1.23,
         backgroundColor: COLORS.bg,
     },
 });

@@ -1,5 +1,6 @@
 import ChangePassword from './ChangePassword';
 import EditProfile from './EditProfile';
+import Feedback from './Feedback';
 import Home from './Home';
 import Profile from './Profile';
 import Settings from './Settings';
@@ -19,4 +20,5 @@ export {
     EditProfile,
     Settings,
     ChangePassword,
+    Feedback,
 };

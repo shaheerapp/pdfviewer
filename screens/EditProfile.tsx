@@ -45,7 +45,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 
     useEffect(() => {
         if (user.language !== language) {
-            setLanguageWarning('On Language Change will effect your downloaded PDFs and on update you will need to login again.');
+            setLanguageWarning('If you change your language, the new translation of the WWJ book will be downloaded when you log in after updating your profile.');
         } else {
             setLanguageWarning('');
         }
@@ -371,6 +371,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
                         <Select.Item label="Hindi" value="Hindi" />
                         <Select.Item label="Arabic" value="Arabic" />
                         <Select.Item label="Turkish" value="Turkish" />
+                        <Select.Item label="Russian" value="Russian" />
                     </Select>
                     {
                         languageWarning &&

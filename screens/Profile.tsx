@@ -71,7 +71,7 @@ const Profile: React.FC<Props> = ({ navigation, login }) => {
                             fontWeight={'bold'}
                             color={COLORS.gray200}
                         >
-                            Username
+                            Email Address
                         </Text>
                         <Box
                             mt={2}
@@ -89,7 +89,7 @@ const Profile: React.FC<Props> = ({ navigation, login }) => {
                                 noOfLines={2}
                                 ellipsizeMode={'tail'}
                             >
-                                {user.username}
+                                {user.emailAddress}
                             </Text>
                         </Box>
                         <Text
