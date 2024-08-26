@@ -231,30 +231,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
                                 <Icon as={Ionicons} name="chevron-forward-outline" size={6} color={COLORS.gray200} />
                             </HStack>
                         </Pressable>
-                        <Pressable
-                            onPress={() => navigation.navigate('Feedback')}
-                            _pressed={{ opacity: 0.8 }}
-                        >
-                            <HStack
-                                justifyContent={'space-between'}
-                                alignItems={'center'}
-                                bg={COLORS.gray0}
-                                p={'2.5'}
-                                pl={4}
-                                mt={2}
-                                rounded={'md'}
-                            >
-                                <Text
-                                    fontSize={15}
-                                    fontFamily={FONTS.InterMedium}
-                                    fontWeight={'medium'}
-                                    color={COLORS.gray200}
-                                >
-                                    Feedback
-                                </Text>
-                                <Icon as={Ionicons} name="chevron-forward-outline" size={6} color={COLORS.gray200} />
-                            </HStack>
-                        </Pressable>
                     </VStack>
                     <Pressable
                         mt={10}

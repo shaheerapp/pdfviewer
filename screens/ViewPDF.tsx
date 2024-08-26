@@ -76,12 +76,30 @@ const ViewPDF: React.FC<Props> = ({ navigation, route }) => {
                     >
                         {currentPage}/{totalPages}
                     </Text>
-                    <Pressable
-                        _pressed={{ opacity: 0.7 }}
-                        onPress={() => handleMarkAsRead(item.id)}
+                    <HStack
+                        alignItems={'center'}
                     >
-                        <Icon as={Ionicons} name={isMarkAsRead ? 'checkmark-circle' : 'checkmark-circle-outline'} color={COLORS.primary} size={7} />
-                    </Pressable>
+                        <Pressable
+                            borderColor={COLORS.primary}
+                            borderWidth={1.5}
+                            height={25}
+                            width={25}
+                            rounded={'full'}
+                            justifyContent={'center'}
+                            alignItems={'center'}
+                            _pressed={{ opacity: 0.8 }}
+                            onPress={() => navigation.navigate('Feedback')}
+                        >
+                            <Ionicons name="mail-outline" size={14} color={COLORS.primary} />
+                        </Pressable>
+                        <Pressable
+                            _pressed={{ opacity: 0.7 }}
+                            ml={4}
+                            onPress={() => handleMarkAsRead(item.id)}
+                        >
+                            <Icon as={Ionicons} name={isMarkAsRead ? 'checkmark-circle' : 'checkmark-circle-outline'} color={COLORS.primary} size={7} />
+                        </Pressable>
+                    </HStack>
                 </HStack>
                 <VStack
                     mt={6}
